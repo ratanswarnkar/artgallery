@@ -15,6 +15,16 @@
     <!-- Bootstrap Icons -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">
 
+
+    <style>
+    .modal {
+        z-index: 99999 !important;
+    }
+    .modal-backdrop {
+        z-index: 99998 !important;
+    }
+</style>
+
 <style>
     /* Fix overlapping dropdown issue */
 .header {
@@ -373,6 +383,7 @@ body.dark-mode {
 }
 
 </style>
+<script src="https://cdn.tiny.cloud/1/no-api-key/tinymce/6/tinymce.min.js" referrerpolicy="origin"></script>
 
 </head>
 
@@ -432,9 +443,9 @@ body.dark-mode {
         <i class="fa fa-chart-line"></i> <span>Analytics</span>
     </a>
 
-    <a href="#">
+    <!-- <a href="#">
         <i class="fa fa-gear"></i> <span>Settings</span>
-    </a>
+    </a> -->
 
 </div>
 
@@ -596,6 +607,7 @@ window.onload = function() {
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 
+<script src="https://cdn.ckeditor.com/ckeditor5/41.2.0/classic/ckeditor.js"></script>
 
 @stack('scripts')
 

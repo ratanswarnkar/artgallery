@@ -23,6 +23,7 @@
                     <tr>
                         <th style="width: 90px;">User ID</th>
                         <th>Name</th>
+                        <th>Username</th>
                         <th>Email</th>
                         <th style="width: 100px;">Status</th>
                         <th style="width: 250px;">Actions</th>
@@ -33,6 +34,7 @@
                     <tr>
                         <td><span class="fw-bold">{{ $admin->id }}</span></td>
                         <td>{{ $admin->name }}</td>
+                        <td>{{ $admin->username }}</td>
                         <td>{{ $admin->email }}</td>
                         <td>
                             <span class="badge bg-{{ $admin->status === 'active' ? 'success' : 'danger' }} px-3 py-2">

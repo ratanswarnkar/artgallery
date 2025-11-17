@@ -5,6 +5,8 @@ use App\Http\Controllers\Front\FrontController;
 use App\Http\Controllers\Admin\AdminController;
 use App\Http\Controllers\User\UserController;
 use App\Http\Controllers\Admin\AdminUserController;
+use App\Http\Controllers\Admin\CategoryController;
+use App\Http\Controllers\Admin\BlogController;
 
 
 Route::get('/', [FrontController::class, 'index'])->name('home');
@@ -59,6 +61,23 @@ Route::middleware('admin')->prefix('admin')->group(function(){
 
 
 
+ Route::resource('categories', CategoryController::class)->names('admin.categories');
+
+
+ /* ---- GALLERIES CRUD ---- */
+    Route::resource('galleries', \App\Http\Controllers\Admin\GalleryController::class)
+        ->names('admin.galleries');
+
+    Route::post('galleries/{gallery}/toggle-status', 
+        [\App\Http\Controllers\Admin\GalleryController::class, 'toggleStatus']
+    )->name('admin.galleries.toggleStatus');
+
+
+    Route::resource('blogs', BlogController::class)->names('admin.blogs');
+Route::post('blogs/toggle/{blog}', [BlogController::class, 'toggleStatus'])->name('admin.blogs.toggle');
+
+
+
 });
 
 
@@ -78,14 +97,9 @@ Route::prefix('admin')->group(function(){
 
 
 
-Route::get('categories', function () {
-    return view('admin.categories.index');
-})->name('admin.categories.index');
 
 
-Route::get('galleries', function () {
-    return view('admin.galleries.index');
-})->name('admin.galleries.index');
+
 
 
 Route::get('blogs', function () {

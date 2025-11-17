@@ -22,7 +22,7 @@ class PaintingController extends Controller
     {
         $categories = Category::select('id', 'name')->orderBy('name')->get();
         $artists = Artist::pluck('name', 'id')->toArray();
-        $galleries = Gallery::pluck('name', 'id')->toArray();
+        $galleries = Gallery::pluck('title', 'id')->toArray();
 
         return view('admin.paintings.create', compact('categories', 'artists', 'galleries'));
     }
@@ -62,7 +62,7 @@ class PaintingController extends Controller
     {
         $artists = Artist::pluck('name','id');
         $categories = Category::pluck('name','id');
-        $galleries = Gallery::pluck('name','id');
+        $galleries = Gallery::pluck('title','id');
 
         return view('admin.paintings.edit', compact('painting','artists','categories','galleries'));
     }

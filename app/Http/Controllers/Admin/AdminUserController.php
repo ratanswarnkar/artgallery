@@ -1,6 +1,7 @@
 <?php
 
 namespace App\Http\Controllers\Admin;
+
 use App\Mail\AdminUserCredentialsMail;
 use App\Http\Controllers\Controller;
 use App\Models\AdminUser;
@@ -11,9 +12,6 @@ use Illuminate\Support\Str;
 
 class AdminUserController extends Controller
 {
-    // Optional: apply middleware to ensure only main admin can access
-   
-
     public function index()
     {
         $admins = AdminUser::orderBy('id','desc')->paginate(15);
@@ -25,29 +23,28 @@ class AdminUserController extends Controller
         return view('admin.admin_users.create');
     }
 
-public function store(Request $request)
-{
-    $data = $request->validate([
-        'name'  => 'required|string|max:255',
-        'email' => 'required|email|unique:admin_users,email',
-    ]);
+    public function store(Request $request)
+    {
+        $data = $request->validate([
+            'name'     => 'required|string|max:255',
+            'username' => 'required|string|max:255|unique:admin_users,username',
+            'email'    => 'required|email|unique:admin_users,email',
+        ]);
 
-    // Generate random password
-    $password = Str::random(10);
+        // Generate random password
+        $password = Str::random(10);
+        $data['password'] = Hash::make($password);
 
-    // Save hashed password
-    $data['password'] = Hash::make($password);
+        // Create admin user
+        $admin = AdminUser::create($data);
 
-    // Create admin user
-    $admin = AdminUser::create($data);
+        // Send login details via email
+        Mail::to($admin->email)->send(new AdminUserCredentialsMail($admin, $password));
 
-    // Send email with template
-    Mail::to($admin->email)->send(new AdminUserCredentialsMail($admin, $password));
-
-    return redirect()->route('admin.admin-users.index')
-        ->with('success','Admin user created and email sent with login credentials.');
-}
-
+        return redirect()
+            ->route('admin.admin-users.index')
+            ->with('success','Admin user created and email sent with credentials.');
+    }
 
     public function edit(AdminUser $admin_user)
     {
@@ -57,10 +54,11 @@ public function store(Request $request)
     public function update(Request $request, AdminUser $admin_user)
     {
         $data = $request->validate([
-            'name'  => 'required|string|max:255',
-            'email' => 'required|email|unique:admin_users,email,'.$admin_user->id,
+            'name'     => 'required|string|max:255',
+            'username' => 'required|string|max:255|unique:admin_users,username,' . $admin_user->id,
+            'email'    => 'required|email|unique:admin_users,email,' . $admin_user->id,
             'password' => 'nullable|string|min:6',
-            'status' => 'nullable|in:active,inactive',
+            'status'   => 'nullable|in:active,inactive',
         ]);
 
         if ($request->filled('password')) {
@@ -71,19 +69,24 @@ public function store(Request $request)
 
         $admin_user->update($data);
 
-        return redirect()->route('admin.admin-users.index')->with('success','Admin user updated.');
+        return redirect()
+            ->route('admin.admin-users.index')
+            ->with('success','Admin user updated successfully.');
     }
 
     public function destroy(AdminUser $admin_user)
     {
         $admin_user->delete();
-        return redirect()->route('admin.admin-users.index')->with('success','Admin deleted.');
+        return redirect()
+            ->route('admin.admin-users.index')
+            ->with('success','Admin user deleted.');
     }
 
     public function toggleStatus(AdminUser $admin_user)
     {
         $admin_user->status = $admin_user->status === 'active' ? 'inactive' : 'active';
         $admin_user->save();
+
         return back()->with('success','Admin status updated.');
     }
 }

@@ -51,31 +51,40 @@ class ArtistController extends Controller
         return view('admin.artists.edit', compact('artist'));
     }
 
-    public function update(Request $request, Artist $artist)
-    {
-        $data = $request->validate([
-            'name'=>'required|string|max:255',
-            'email'=>'nullable|email|unique:artists,email,'.$artist->id,
-            'phone'=>'nullable|string|max:50',
-            'bio'=>'nullable|string',
-            'photo'=>'nullable|image|max:2048',
-        ]);
+   public function update(Request $request, Artist $artist)
+{
+    $data = $request->validate([
+        'name'     => 'required|string|max:255',
+        'username' => 'required|string|max:255|unique:artists,username,' . $artist->id,
+        'email'    => 'nullable|email|unique:artists,email,' . $artist->id,
+        'phone'    => 'nullable|string|max:50',
+        'bio'      => 'nullable|string',
+        'photo'    => 'nullable|image|max:2048',
+    ]);
 
-        if ($request->hasFile('photo')) {
-            // delete old
-            if ($artist->photo && file_exists(public_path('uploads/artists/'.$artist->photo))) {
-                @unlink(public_path('uploads/artists/'.$artist->photo));
-            }
-            $file = $request->file('photo');
-            $filename = time() . '_' . Str::random(6) . '.' . $file->getClientOriginalExtension();
-            $file->move(public_path('uploads/artists'), $filename);
-            $data['photo'] = $filename;
+    // Handle photo upload
+    if ($request->hasFile('photo')) {
+        // delete old
+        if ($artist->photo && file_exists(public_path('uploads/artists/'.$artist->photo))) {
+            @unlink(public_path('uploads/artists/'.$artist->photo));
         }
 
-        $artist->update($data);
-
-        return redirect()->route('admin.artists.index')->with('success','Artist updated.');
+        $file = $request->file('photo');
+        $filename = time() . '_' . Str::random(6) . '.' . $file->getClientOriginalExtension();
+        $file->move(public_path('uploads/artists'), $filename);
+        $data['photo'] = $filename;
     }
+
+    // (Optional) If you want to keep slug in sync with username or name:
+    // $data['slug'] = Str::slug($data['username'] ?? $data['name']);
+
+    $artist->update($data);
+
+    return redirect()
+        ->route('admin.artists.index')
+        ->with('success','Artist updated.');
+}
+
 
     public function destroy(Artist $artist)
     {

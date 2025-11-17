@@ -38,6 +38,12 @@
                 </div>
 
                 <div class="mb-3">
+    <label class="form-label">Username</label>
+    <input type="text" name="username" class="form-control" required>
+</div>
+
+
+                <div class="mb-3">
                     <label class="fw-semibold">Email (User ID)</label>
                     <input type="email" name="email" 
                            value="{{ $admin_user->email }}" 
