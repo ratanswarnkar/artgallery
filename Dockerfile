@@ -4,8 +4,9 @@
 FROM composer:2 AS vendor
 
 WORKDIR /app
-COPY composer.json composer.lock ./
-RUN composer install --no-dev --optimize-autoloader
+COPY . .       # <-- copy full project so artisan exists
+RUN composer install --no-dev --optimize-autoloader --no-scripts
+
 
 # -------------------------------------------------------
 # Stage 2: Node build (Vite production build)
@@ -17,6 +18,7 @@ COPY package.json ./
 RUN npm install
 COPY . .
 RUN npm run build
+
 
 # -------------------------------------------------------
 # Stage 3: Laravel Production Server (PHP 8.4)
@@ -34,15 +36,17 @@ WORKDIR /var/www/html
 COPY --from=vendor /app/vendor ./vendor
 COPY --from=frontend /app/public/build ./public/build
 
-# Copy all project files
+# Copy full project
 COPY . .
+
+# Optimize Laravel
+RUN php artisan config:clear || true
+RUN php artisan route:clear || true
+RUN php artisan view:clear || true
 
 # Permissions
 RUN chown -R www-data:www-data storage bootstrap/cache
 
 EXPOSE 8000
 
-CMD php artisan config:clear && \
-    php artisan route:clear && \
-    php artisan view:clear && \
-    php artisan serve --host 0.0.0.0 --port 8000
+CMD php artisan serve --host 0.0.0.0 --port 8000
