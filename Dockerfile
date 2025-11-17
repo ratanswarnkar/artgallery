@@ -8,7 +8,7 @@ WORKDIR /app
 COPY composer.json composer.lock ./
 RUN composer install --no-dev --optimize-autoloader --no-scripts
 
-COPY . .        # Copy full project after vendor folder is ready
+COPY . .  # Copy full project so artisan exists
 
 
 # -------------------------------------------------------
@@ -20,6 +20,7 @@ WORKDIR /app
 
 COPY package.json ./
 RUN npm install
+
 COPY . .
 RUN npm run build
 
@@ -36,14 +37,14 @@ RUN apt-get update && apt-get install -y \
 
 WORKDIR /var/www/html
 
-# Copy vendor & public build from previous stages
+# Copy vendor + built assets
 COPY --from=vendor /app/vendor ./vendor
 COPY --from=frontend /app/public/build ./public/build
 
-# Copy rest of the app code
+# Copy project files
 COPY . .
 
-# Fix permissions
+# Permissions
 RUN chown -R www-data:www-data storage bootstrap/cache
 
 EXPOSE 8000

@@ -4,6 +4,6 @@ node_modules
 vendor
 storage/framework/cache/data/*
 storage/logs/*
+.env
 docker-compose.yml
 npm-debug.log
-.env
