@@ -4,8 +4,11 @@
 FROM composer:2 AS vendor
 
 WORKDIR /app
-COPY . .       # <-- copy full project so artisan exists
+
+COPY composer.json composer.lock ./
 RUN composer install --no-dev --optimize-autoloader --no-scripts
+
+COPY . .        # Copy full project after vendor folder is ready
 
 
 # -------------------------------------------------------
@@ -14,6 +17,7 @@ RUN composer install --no-dev --optimize-autoloader --no-scripts
 FROM node:20 AS frontend
 
 WORKDIR /app
+
 COPY package.json ./
 RUN npm install
 COPY . .
@@ -25,26 +29,21 @@ RUN npm run build
 # -------------------------------------------------------
 FROM php:8.4-fpm
 
-# Install system dependencies
+# Install PHP extensions
 RUN apt-get update && apt-get install -y \
     git curl zip unzip libpng-dev libonig-dev libxml2-dev libzip-dev \
     && docker-php-ext-install pdo_mysql mbstring zip exif pcntl bcmath
 
 WORKDIR /var/www/html
 
-# Copy vendor & built assets
+# Copy vendor & public build from previous stages
 COPY --from=vendor /app/vendor ./vendor
 COPY --from=frontend /app/public/build ./public/build
 
-# Copy full project
+# Copy rest of the app code
 COPY . .
 
-# Optimize Laravel
-RUN php artisan config:clear || true
-RUN php artisan route:clear || true
-RUN php artisan view:clear || true
-
-# Permissions
+# Fix permissions
 RUN chown -R www-data:www-data storage bootstrap/cache
 
 EXPOSE 8000
