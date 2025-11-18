@@ -78,6 +78,16 @@ Route::post('blogs/toggle/{blog}', [BlogController::class, 'toggleStatus'])->nam
 
 
 
+
+/* ---- EVENTS CRUD ---- */
+Route::resource('events', \App\Http\Controllers\Admin\EventController::class)
+    ->names('admin.events');
+
+Route::post('events/{event}/toggle-status',
+    [\App\Http\Controllers\Admin\EventController::class, 'toggleStatus']
+)->name('admin.events.toggleStatus');
+
+
 });
 
 
@@ -106,3 +116,5 @@ Route::get('blogs', function () {
     return view('admin.blogs.index');
 })->name('admin.blogs.index');
 
+Route::get('analytics', [\App\Http\Controllers\Admin\AdminController::class, 'analytics'])
+    ->name('admin.analytics');

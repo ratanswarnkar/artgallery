@@ -3,148 +3,125 @@
 @section('content')
 <div class="container-fluid">
 
-    <div class="d-flex justify-content-between align-items-center mb-3">
-        <h4 class="mb-0">Blog Management</h4>
-        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#createBlogModal">+ Add Blog</button>
-    </div>
+    <h2 class="mb-4">Blogs</h2>
 
     @if(session('success'))
         <div class="alert alert-success">{{ session('success') }}</div>
     @endif
 
+    <div class="card p-4 mb-4">
+        <h4>Create Blog</h4>
+        <form action="{{ route('admin.blogs.store') }}" method="POST" enctype="multipart/form-data">
+            @csrf
+
+            <div class="mb-3">
+                <label>Title *</label>
+                <input type="text" name="title" id="title" class="form-control" required onkeyup="generateSlug()">
+            </div>
+
+            <div class="mb-3">
+                <label>Slug (auto editable)</label>
+                <input type="text" name="slug" id="slug" class="form-control">
+            </div>
+
+            <div class="mb-3">
+                <label>Short Description *</label>
+                <textarea name="short_description" class="form-control" required></textarea>
+            </div>
+
+            <div class="mb-3">
+                <label>SEO Title</label>
+                <input type="text" name="seo_title" class="form-control">
+            </div>
+
+            <div class="mb-3">
+                <label>Meta Description</label>
+                <textarea name="meta_description" class="form-control"></textarea>
+            </div>
+
+            <div class="mb-3">
+                <label>Status</label>
+                <select name="status" class="form-control">
+                    <option value="draft">Draft</option>
+                    <option value="published">Published</option>
+                </select>
+            </div>
+
+            <div class="mb-3">
+                <label>Image</label>
+                <input type="file" name="image" class="form-control">
+            </div>
+
+            <label>Content *</label>
+            <textarea name="content" id="blogContent" class="form-control" required></textarea>
+
+            <button class="btn btn-primary mt-3">Create Blog</button>
+        </form>
+    </div>
+
+    <h4>All Blogs</h4>
     <div class="card p-3">
-        <table class="table table-bordered align-middle">
-            <thead class="table-dark">
+        <table class="table table-striped">
+            <thead>
                 <tr>
-                    <th>#</th>
-                    <th>Image</th>
+                    <th>ID</th>
                     <th>Title</th>
+                    <th>Slug</th>
+                    <th>Short Desc</th>
                     <th>Status</th>
-                    <th width="220">Actions</th>
+                    <th>Content</th>
+                    <th>Actions</th>
                 </tr>
             </thead>
-
             <tbody>
-                @forelse($blogs as $blog)
+                @foreach($blogs as $blog)
                 <tr>
-                    <td>{{ $loop->iteration }}</td>
-
-                    <td>
-                        @if($blog->image)
-                            <img src="{{ asset('uploads/blogs/'.$blog->image) }}" width="60" height="60" class="rounded">
-                        @else
-                            <span class="text-muted">No Image</span>
-                        @endif
-                    </td>
-
+                    <td>{{ $blog->id }}</td>
                     <td>{{ $blog->title }}</td>
-
+                    <td>{{ $blog->slug }}</td>
+                    <td>{{ Str::limit($blog->short_description, 30) }}</td>
+                    <td>{{ $blog->status }}</td>
+                    <td>{!! Str::limit(strip_tags($blog->content), 40) !!}</td>
                     <td>
-                        <form action="{{ route('admin.blogs.toggle', $blog->id) }}" method="POST">
-                            @csrf
-                            <button class="btn btn-sm {{ $blog->status == 'active' ? 'btn-success' : 'btn-secondary' }}">
-                                {{ ucfirst($blog->status) }}
-                            </button>
-                        </form>
-                    </td>
+                        <a href="{{ route('admin.blogs.edit', $blog->id) }}" class="btn btn-sm btn-info">✏ Edit</a>
 
-                    <td>
-                        <button class="btn btn-info btn-sm editBlogBtn"
-                            data-id="{{ $blog->id }}"
-                            data-title="{{ $blog->title }}"
-                            data-short="{{ $blog->short_description }}"
-                            data-content="{{ htmlspecialchars($blog->content) }}"
-                            data-bs-toggle="modal"
-                            data-bs-target="#editBlogModal">
-                            Edit
-                        </button>
-
-                        <form action="{{ route('admin.blogs.destroy', $blog->id) }}" method="POST" class="d-inline"
-                              onsubmit="return confirm('Are you sure want to delete this blog?');">
+                        <form action="{{ route('admin.blogs.destroy', $blog->id) }}" 
+                              method="POST" class="d-inline"
+                              onsubmit="return confirm('Delete this blog?')">
                             @csrf @method('DELETE')
-                            <button class="btn btn-danger btn-sm">Delete</button>
+                            <button class="btn btn-sm btn-danger">🗑 Delete</button>
                         </form>
 
-                        <form action="{{ route('admin.blogs.toggle', $blog->id) }}" method="POST" class="d-inline">
-                            @csrf
-                            <button class="btn btn-dark btn-sm">
-                                {{ $blog->status == 'active' ? 'Block' : 'Unblock' }}
-                            </button>
-                        </form>
                     </td>
                 </tr>
-                @empty
-                <tr>
-                    <td colspan="5" class="text-center text-muted">No blogs found</td>
-                </tr>
-                @endforelse
+                @endforeach
             </tbody>
         </table>
 
-        <div class="d-flex justify-content-center">
+        <div class="mt-3">
             {{ $blogs->links() }}
         </div>
     </div>
+
 </div>
+@endsection
+
 @section('scripts')
-<script src="https://cdn.tiny.cloud/1/no-api-key/tinymce/6/tinymce.min.js" referrerpolicy="origin"></script>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<link href="https://cdn.jsdelivr.net/npm/summernote@0.8.20/dist/summernote-lite.min.css" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/summernote@0.8.20/dist/summernote-lite.min.js"></script>
 
 <script>
-function loadTiny(selector) {
-    tinymce.init({
-        selector: selector,
-        height: 350,
-        menubar: true,
-        plugins: 'print preview importcss searchreplace autolink autosave save directionality code visualblocks visualchars fullscreen image link media table charmap hr pagebreak nonbreaking anchor lists wordcount help emoticons',
-        toolbar: 'undo redo | bold italic underline strikethrough | fontfamily fontsize blocks | ' +
-            'alignleft aligncenter alignright alignjustify | outdent indent | numlist bullist | ' +
-            'link image media table anchor | forecolor backcolor removeformat | preview code fullscreen',
-        toolbar_sticky: true,
-        image_title: true,
-        automatic_uploads: true,
-    });
+function generateSlug() {
+    let title = document.getElementById("title").value;
+    let slug = title.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/(^-|-$)/g,'');
+    document.getElementById("slug").value = slug;
 }
 
-/* CREATE BLOG MODAL */
-document.getElementById('createBlogModal').addEventListener('shown.bs.modal', function () {
-    setTimeout(() => {
-        tinymce.remove("#createBlogEditor");
-        loadTiny("#createBlogEditor");
-    }, 200);
-});
-
-/* EDIT BLOG MODAL */
-document.querySelectorAll('.editBlogBtn').forEach(btn => {
-    btn.addEventListener('click', function() {
-        let id      = this.dataset.id;
-        let title   = this.dataset.title;
-        let shortD  = this.dataset.short;
-        let content = this.dataset.content;
-
-        document.getElementById('editBlogForm').action = "/admin/blogs/update/" + id;
-        document.getElementById('editTitle').value = title;
-        document.getElementById('editShort').value = shortD;
-
-        setTimeout(() => {
-            tinymce.remove("#editBlogEditor");
-            loadTiny("#editBlogEditor");
-            tinymce.get("editBlogEditor").setContent(content);
-        }, 200);
+$(document).ready(function () {
+    $('#blogContent').summernote({
+        height: 250
     });
-});
-
-/* Make sure content is saved before submit */
-document.addEventListener("submit", function() {
-    if (tinymce.get("createBlogEditor")) tinymce.get("createBlogEditor").save();
-    if (tinymce.get("editBlogEditor")) tinymce.get("editBlogEditor").save();
 });
 </script>
 @endsection
-
-
-@include('admin.blogs.create')
-@include('admin.blogs.edit')
-
-@endsection
-
-

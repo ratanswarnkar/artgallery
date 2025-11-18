@@ -17,14 +17,24 @@ class AdminController extends Controller
 
     public function dashboard()
 {
-    $artistCount = \App\Models\Artist::count();
+    $artistCount   = \App\Models\Artist::count();
+    $paintingCount = \App\Models\Painting::count();  // Count paintings
+    $admin_usersCount = \App\Models\AdminUser::count();  // Count admin users
 
-    // If you don't have these tables yet, set them to 0 for now:
-    $paintingCount = 0; 
-    $branchCount = 0;   
 
-    return view('admin.dashboard', compact('artistCount', 'paintingCount', 'branchCount'));
+    return view('admin.dashboard', compact(
+        'artistCount',
+        'paintingCount',
+        'admin_usersCount',
+    ));
 }
+
+public function analytics()
+{
+    return view('admin.analytics');
+}
+
+
 
 
     public function login(){

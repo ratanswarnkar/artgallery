@@ -9,103 +9,114 @@ use Illuminate\Support\Str;
 
 class BlogController extends Controller
 {
+
     public function index()
-    {
-        $blogs = Blog::latest()->paginate(10);
-        return view('admin.blogs.index', compact('blogs'));
+{
+    $blogs = Blog::latest()->paginate(10);
+    return view('admin.blogs.index', compact('blogs'));
+}
+
+   public function store(Request $request)
+{
+    $data = $request->validate([
+        'title'   => 'required|string|max:255',
+        'slug'   => 'nullable|string|max:255',
+        'seo_title' => 'nullable|string|max:255',
+        'meta_description' => 'nullable|string|max:500',
+        'short_description' => 'nullable|string|max:500',
+        'status' => 'required|in:draft,published',
+        'content' => 'required|string',
+        'image'   => 'nullable|image|max:4096',
+    ]);
+
+    $slug = $request->slug ? Str::slug($request->slug) : Str::slug($request->title);
+    $originalSlug = $slug;
+    $counter = 1;
+    while (Blog::where('slug', $slug)->exists()) {
+        $slug = $originalSlug . '-' . $counter++;
+    }
+    $data['slug'] = $slug;
+
+    if ($request->hasFile('image')) {
+        $file = $request->file('image');
+        $filename = time().'_'.uniqid().'.'.$file->getClientOriginalExtension();
+        $file->move(public_path('uploads/blogs'), $filename);
+        $data['image'] = $filename;
     }
 
-    public function store(Request $request)
-    {
-        $data = $request->validate([
-            'title'   => 'required|string|max:255',
-            'short_description' => 'required|string|max:500',
-            'content' => 'required|string',
-            'image'   => 'required|image|max:4096',
-        ]);
+    Blog::create($data);
 
-        // Auto-generate slug
-        $data['slug'] = Str::slug($request->title);
+    return back()->with('success', 'Blog created successfully!');
+}
 
-        // Ensure unique slug
-        $originalSlug = $data['slug'];
+
+public function update(Request $request, Blog $blog)
+{
+    $data = $request->validate([
+        'title'   => 'required|string|max:255',
+        'slug'   => 'nullable|string|max:255',
+        'seo_title' => 'nullable|string|max:255',
+        'meta_description' => 'nullable|string|max:500',
+        'short_description' => 'nullable|string|max:500',
+        'status' => 'required|in:draft,published',
+        'content' => 'required|string',
+        'image'   => 'nullable|image|max:4096',
+    ]);
+
+    if ($request->slug != $blog->slug) {
+        $slug = Str::slug($request->slug ?: $request->title);
+        $originalSlug = $slug;
         $counter = 1;
-        while (Blog::where('slug', $data['slug'])->exists()) {
-            $data['slug'] = $originalSlug . '-' . $counter;
-            $counter++;
+        while (Blog::where('slug', $slug)->where('id','!=',$blog->id)->exists()) {
+            $slug = $originalSlug . '-' . $counter++;
         }
-
-        // Upload Image
-        if ($request->hasFile('image')) {
-            $file = $request->file('image');
-            $filename = time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
-            $file->move(public_path('uploads/blogs'), $filename);
-            $data['image'] = $filename;
-        }
-
-        // Default status
-        $data['status'] = 'active';
-
-        Blog::create($data);
-
-        return redirect()->route('admin.blogs.index')->with('success', 'Blog created successfully!');
+        $data['slug'] = $slug;
     }
 
-    public function update(Request $request, Blog $blog)
-    {
-        $data = $request->validate([
-            'title'   => 'required|string|max:255',
-            'short_description' => 'required|string|max:500',
-            'content' => 'required|string',
-            'image'   => 'nullable|image|max:4096',
-        ]);
-
-        // Generate slug again on title change
-        $newSlug = Str::slug($request->title);
-
-        if ($newSlug != $blog->slug) {
-            $originalSlug = $newSlug;
-            $counter = 1;
-            while (Blog::where('slug', $newSlug)->where('id', '!=', $blog->id)->exists()) {
-                $newSlug = $originalSlug . '-' . $counter;
-                $counter++;
-            }
-            $data['slug'] = $newSlug;
+    if ($request->hasFile('image')) {
+        if ($blog->image && file_exists(public_path('uploads/blogs/'.$blog->image))) {
+            @unlink(public_path('uploads/blogs/'.$blog->image));
         }
-
-        // Image upload
-        if ($request->hasFile('image')) {
-            if ($blog->image && file_exists(public_path('uploads/blogs/' . $blog->image))) {
-                @unlink(public_path('uploads/blogs/' . $blog->image));
-            }
-
-            $file = $request->file('image');
-            $filename = time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
-            $file->move(public_path('uploads/blogs'), $filename);
-            $data['image'] = $filename;
-        }
-
-        $blog->update($data);
-
-        return redirect()->route('admin.blogs.index')->with('success', 'Blog updated successfully!');
+        $file = $request->file('image');
+        $filename = time().'_'.uniqid().'.'.$file->getClientOriginalExtension();
+        $file->move(public_path('uploads/blogs'), $filename);
+        $data['image'] = $filename;
     }
 
-    public function destroy(Blog $blog)
-    {
-        if ($blog->image && file_exists(public_path('uploads/blogs/' . $blog->image))) {
-            @unlink(public_path('uploads/blogs/' . $blog->image));
-        }
+    $blog->update($data);
 
-        $blog->delete();
+    return redirect()->route('admin.blogs.index')->with('success', 'Blog updated successfully!');
 
-        return back()->with('success', 'Blog deleted successfully!');
+}
+
+public function create()
+{
+    return view('admin.blogs.create');
+}
+
+public function edit(Blog $blog)
+{
+    return view('admin.blogs.edit', compact('blog'));
+}
+
+public function destroy(Blog $blog)
+{
+    if ($blog->image && file_exists(public_path('uploads/blogs/'.$blog->image))) {
+        @unlink(public_path('uploads/blogs/'.$blog->image));
     }
 
-    public function toggleStatus(Blog $blog)
-    {
-        $blog->status = $blog->status == 'active' ? 'inactive' : 'active';
-        $blog->save();
+    $blog->delete();
+    return back()->with('success', 'Blog deleted successfully!');
+}
 
-        return back()->with('success', 'Status Updated!');
-    }
+public function toggleStatus(Blog $blog)
+{
+    $blog->status = $blog->status === 'published' ? 'draft' : 'published';
+    $blog->save();
+
+    return back()->with('success', 'Blog status updated!');
+}
+
+
+
 }
