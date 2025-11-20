@@ -38,7 +38,7 @@ Route::get('/logout', [UserController::class, 'logout'])->name('logout');
 
 //Admin
 
-Route::middleware('admin')->prefix('admin')->group(function(){
+Route::prefix('admin')->group(function(){
 
     Route::get('/dashboard', [AdminController::class, 'dashboard'])->name('admin_dashboard');
     Route::get('/profile', [AdminController::class, 'profile'])->name('admin_profile');
