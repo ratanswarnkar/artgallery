@@ -31,7 +31,8 @@
             <tbody>
                 @forelse($galleries as $gallery)
                 <tr>
-                    <td>{{ $gallery->id }}</td>
+                   <td>{{ $loop->iteration }}</td>
+
 
                     <td>
                         @if($gallery->image)

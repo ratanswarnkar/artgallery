@@ -24,8 +24,7 @@
     </select>
 
     <label>Description</label>
-    <textarea name="description" rows="4"
-              style="width:100%;padding:10px;margin:10px 0;border-radius:6px;border:1px solid #ccc;">{{ $painting->description }}</textarea>
+    <textarea name="description" class="summernote">{{ $painting->description }}</textarea>
 
     <label>Price</label>
     <input type="number" step="0.01" name="price" value="{{ $painting->price }}"
@@ -69,3 +68,22 @@ document.getElementById('imageInput').addEventListener('change', function(e){
 </script>
 
 @endsection
+
+{{-- Summernote CSS --}}
+@push('styles')
+<link href="https://cdnjs.cloudflare.com/ajax/libs/summernote/0.8.18/summernote-lite.min.css" rel="stylesheet">
+@endpush
+
+{{-- Summernote JS --}}
+@push('scripts')
+<script src="https://cdnjs.cloudflare.com/ajax/libs/summernote/0.8.18/summernote-lite.min.js"></script>
+
+<script>
+    $(document).ready(function() {
+        $('.summernote').summernote({
+            placeholder: 'Enter painting description...',
+            height: 250,
+        });
+    });
+</script>
+@endpush

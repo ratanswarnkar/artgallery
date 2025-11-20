@@ -1,35 +1,32 @@
 <?php
+
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Str;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Foundation\Auth\User as Authenticatable;
+use Illuminate\Notifications\Notifiable;
 
-class Artist extends Model
+class Artist extends Authenticatable
 {
+    use HasFactory, Notifiable;
+
+    protected $table = 'artists';
+
     protected $fillable = [
-    'name',
-    'username',
-    'slug',
-    'email',
-    'phone',
-    'bio',
-    'photo',
-    'status',
-];
+        'name',
+        'email',
+        'password',
+        'bio',
+        'photo',
+        'status',
+    ];
 
+    protected $hidden = [
+        'password',
+        'remember_token',
+    ];
 
-    // Auto-set slug on creating
-    protected static function booted()
-    {
-        static::creating(function ($artist) {
-            if (empty($artist->slug)) {
-                $artist->slug = Str::slug($artist->name) . '-' . Str::random(6);
-            }
-        });
-    }
-
-    public function isBlocked()
-    {
-        return $this->status === 'blocked';
-    }
+    protected $casts = [
+        // 'status' => 'boolean',
+    ];
 }

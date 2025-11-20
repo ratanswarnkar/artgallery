@@ -475,7 +475,11 @@ body.dark-mode {
         <div class="search-suggestions" id="searchSuggestions"></div>
     </div>
 
+    
+
     <div class="header-right">
+
+    
 
         <!-- Notifications -->
         <div class="icon-btn position-relative notif-btn" onclick="toggleNotification()">

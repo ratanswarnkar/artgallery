@@ -21,8 +21,7 @@
     </select>
 
     <label>Description</label>
-    <textarea name="description" rows="4"
-              style="width:100%;padding:10px;margin:10px 0;border-radius:6px;border:1px solid #ccc;"></textarea>
+    <textarea name="description" class="summernote"></textarea>
 
     <label>Price</label>
     <input type="number" step="0.01" name="price"
@@ -47,6 +46,7 @@
     </button>
 </form>
 
+<!-- Image Preview -->
 <script>
 document.getElementById('imageInput').addEventListener('change', function(e){
     const file = e.target.files[0];
@@ -58,3 +58,20 @@ document.getElementById('imageInput').addEventListener('change', function(e){
 </script>
 
 @endsection
+
+@push('styles')
+<link href="https://cdnjs.cloudflare.com/ajax/libs/summernote/0.8.18/summernote-lite.min.css" rel="stylesheet">
+@endpush
+
+@push('scripts')
+<script src="https://cdnjs.cloudflare.com/ajax/libs/summernote/0.8.18/summernote-lite.min.js"></script>
+
+<script>
+    $(document).ready(function() {
+        $('.summernote').summernote({
+            placeholder: 'Enter painting description...',
+            height: 250,
+        });
+    });
+</script>
+@endpush

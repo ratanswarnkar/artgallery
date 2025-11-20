@@ -8,6 +8,12 @@ use App\Http\Controllers\Admin\AdminUserController;
 use App\Http\Controllers\Admin\CategoryController;
 use App\Http\Controllers\Admin\BlogController;
 
+use App\Http\Controllers\UserAdmin\AuthController as UserAdminAuth;
+use App\Http\Controllers\UserAdmin\DashboardController as UserAdminDashboard;
+
+use App\Http\Controllers\Artist\AuthController as ArtistAuth;
+use App\Http\Controllers\Artist\DashboardController as ArtistDashboard;
+
 
 Route::get('/', [FrontController::class, 'index'])->name('home');
 Route::get('/about', [FrontController::class, 'about'])->name('about');
@@ -56,7 +62,7 @@ Route::middleware('admin')->prefix('admin')->group(function(){
 
 
     Route::resource('admin-users', AdminUserController::class)->names('admin.admin-users');
-    Route::get('admin-users/{admin_user}/toggle-status', [AdminUserController::class, 'toggleStatus'])
+    Route::post('admin-users/{admin_user}/toggle-status', [AdminUserController::class, 'toggleStatus'])
          ->name('admin.admin-users.toggle-status');
 
 
@@ -103,6 +109,52 @@ Route::prefix('admin')->group(function(){
     Route::get('/reset-password/{token}/{email}', [AdminController::class, 'reset_password'])->name('admin_reset_password');
     Route::post('/reset-password/{token}/{email}', [AdminController::class, 'reset_password_submit'])->name('admin_reset_password_submit');
     Route::get('/logout', [AdminController::class, 'logout'])->name('admin_logout');
+
+
+
+  
+
+
+
+
+
+
+});
+
+
+  /*-------------------------------------------------
+| SUB ADMIN (ADMIN USER) AUTH
+--------------------------------------------------*/
+
+
+Route::prefix('admin-user')->group(function () {
+
+    Route::get('/login', [UserAdminAuth::class, 'login'])->name('user_admin.login');
+    Route::post('/login', [UserAdminAuth::class, 'login_submit'])->name('user_admin.login_submit');
+
+    Route::middleware('user_admin')->group(function () {
+        Route::get('/dashboard', [UserAdminDashboard::class, 'index'])->name('user_admin.dashboard');
+        Route::get('/logout', [UserAdminAuth::class, 'logout'])->name('user_admin.logout');
+    });
+
+});
+
+
+/*-------------------------------------------------
+| ARTIST AUTH
+--------------------------------------------------*/
+
+
+Route::prefix('artist')->group(function () {
+
+    Route::get('/login', [ArtistAuth::class, 'login'])->name('artist.login');
+    Route::post('/login', [ArtistAuth::class, 'login_submit'])->name('artist.login_submit');
+
+    Route::middleware('artist')->group(function () {
+        Route::get('/dashboard', [ArtistDashboard::class, 'index'])->name('artist.dashboard');
+        Route::get('/logout', [ArtistAuth::class, 'logout'])->name('artist.logout');
+    });
+
 });
 
 

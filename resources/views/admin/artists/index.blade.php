@@ -117,7 +117,8 @@
         <tbody>
             @foreach($artists as $artist)
             <tr>
-                <td>{{ $artist->id }}</td>
+               <td>{{ $loop->iteration }}</td>
+
 
                 <td>
                     @if($artist->photo)

@@ -40,7 +40,8 @@
                 <tbody>
                     @foreach($paintings as $painting)
                     <tr>
-                        <td class="fw-bold">{{ $painting->id }}</td>
+                        <td>{{ $loop->iteration }}</td>
+
 
                         <td>
                             @if($painting->image)

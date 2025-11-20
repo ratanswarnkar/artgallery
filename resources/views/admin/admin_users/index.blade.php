@@ -32,7 +32,7 @@
                 <tbody>
                     @forelse($admins as $admin)
                     <tr>
-                        <td><span class="fw-bold">{{ $admin->id }}</span></td>
+                        <td>{{ $loop->iteration }}</td>
                         <td>{{ $admin->name }}</td>
                         <td>{{ $admin->username }}</td>
                         <td>{{ $admin->email }}</td>
@@ -46,10 +46,14 @@
                                 <i class="bi bi-pencil-square"></i> Edit
                             </a>
 
-                            <a href="{{ route('admin.admin-users.toggle-status', $admin->id) }}"
-                               class="btn btn-sm btn-warning">
-                                <i class="bi bi-shuffle"></i> Block
-                            </a>
+                            <form action="{{ route('admin.admin-users.toggle-status', $admin->id) }}"
+      method="POST" style="display:inline-block;">
+    @csrf
+    <button class="btn btn-sm btn-warning">
+        <i class="bi bi-shuffle"></i> Block
+    </button>
+</form>
+
 
                             <form method="POST"
                                   action="{{ route('admin.admin-users.destroy', $admin->id) }}"

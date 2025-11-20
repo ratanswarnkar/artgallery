@@ -41,7 +41,8 @@
                 <tbody>
                     @forelse($categories as $category)
                     <tr>
-                        <td>{{ $category->id }}</td>
+                        <td>{{ $loop->iteration }}</td>
+
 
                         <td class="fw-semibold">{{ $category->name }}</td>
 

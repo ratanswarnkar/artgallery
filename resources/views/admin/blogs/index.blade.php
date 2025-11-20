@@ -76,7 +76,8 @@
             <tbody>
                 @foreach($blogs as $blog)
                 <tr>
-                    <td>{{ $blog->id }}</td>
+                    <td>{{ $loop->iteration }}</td>
+
                     <td>{{ $blog->title }}</td>
                     <td>{{ $blog->slug }}</td>
                     <td>{{ Str::limit($blog->short_description, 30) }}</td>
