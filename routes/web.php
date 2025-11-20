@@ -170,3 +170,8 @@ Route::get('blogs', function () {
 
 Route::get('analytics', [\App\Http\Controllers\Admin\AdminController::class, 'analytics'])
     ->name('admin.analytics');
+
+
+
+
+    

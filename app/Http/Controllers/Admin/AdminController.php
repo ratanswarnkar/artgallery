@@ -154,5 +154,7 @@ public function logout(){
         return redirect()->back()->with('success','Profile Updated Successfully');
     }
 
+   
+
 
 }
